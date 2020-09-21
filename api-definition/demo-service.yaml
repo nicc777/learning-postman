@@ -1,0 +1,80 @@
+openapi: 3.0.0
+
+info:
+  title: Demo API
+  description: A simple demonstration API that can be used in multiple applications. Intended for Postman testing of a Python service.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:5000
+    description: Assuming a local test environment
+
+paths:
+
+  /readiness:
+    get:
+      tags:
+        - Monitoring
+      summary: Return the status of the service
+      security: []
+      description: Unauthenticated request to allow a basic ping to the service to ensure it is up and running.
+      operationId: test_service.demo_service.readiness
+      responses:
+        200:
+          description: Returning the current timestamp. A positive integer means the service is up and ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Readiness'
+
+  /user/profile:
+    get:
+      tags:
+        - Profile
+      summary: Get the user profile
+      security: 
+        - bearerAuth: []
+      description: The required UID for the lookup is obtained from the `sub` value in the Access Token (JWT)
+      operationId: test_service.demo_service.user_profile_get
+      responses:
+        200:
+          description: The user profile data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+
+components:
+
+  schemas:
+
+    UserProfile:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: "cqgnFhm1nSbk7lZw6R1cZ7m7CHnwX3kd@clients"
+        name:
+          type: string
+          example: Pete
+        emailAddress:
+          type: string
+          example: pete@example.tld
+
+    Readiness:
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          example: 1234567890
+
+  securitySchemes:
+
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT  
+      x-bearerInfoFunc: test_service.demo_service.decode_token
+
+security: 
+  - bearerAuth: []  
