@@ -109,10 +109,9 @@ def readiness():
 
 def user_profile_get(token_info):
     print('token_info={}'.format(token_info))
-    user_id = token_info['sub']
-    name = 'User 1'
-    email_address = 'user1@example.tld'
-    return { 'userId': user_id, 'name': name, 'emailAddress': email_address }, 200
+    machine_client_id = token_info['sub']
+    authorization_type = token_info['gty']
+    return { 'machineClientId': machine_client_id, 'authorizationType': authorization_type }, 200
 
 
 options = {"swagger_ui": False}

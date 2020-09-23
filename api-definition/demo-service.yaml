@@ -51,13 +51,10 @@ components:
     UserProfile:
       type: object
       properties:
-        userId:
-          type: string
-          example: "cqgnFhm1nSbk7lZw6R1cZ7m7CHnwX3kd@clients"
-        name:
+        machineClientId:
           type: string
           example: Pete
-        emailAddress:
+        authorizationType:
           type: string
           example: pete@example.tld
 
