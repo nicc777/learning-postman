@@ -27,14 +27,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Readiness'
 
-  /user/profile:
+  /client/profile:
     get:
       tags:
         - Profile
-      summary: Get the user profile
+      summary: Get the client profile
       security: 
         - bearerAuth: []
-      description: The required UID for the lookup is obtained from the `sub` value in the Access Token (JWT)
+      description: The required client ID is obtained from the `sub` value in the Access Token (JWT)
       operationId: test_service.demo_service.user_profile_get
       responses:
         200:
@@ -42,21 +42,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserProfile'
+                $ref: '#/components/schemas/ClientProfile'
 
 components:
 
   schemas:
 
-    UserProfile:
+    ClientProfile:
       type: object
       properties:
         machineClientId:
           type: string
-          example: Pete
+          example: abcdefghiklmn
         authorizationType:
           type: string
-          example: pete@example.tld
+          example: client-credentials
 
     Readiness:
       type: object

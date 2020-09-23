@@ -115,7 +115,7 @@ def user_profile_get(token_info):
 
 
 options = {"swagger_ui": False}
-if int(os.getenv('SWAGGER_UI', '1')) > 0:
+if int(os.getenv('SWAGGER_UI', '0')) > 0:
     options = {"swagger_ui": True}    
 app = connexion.FlaskApp(__name__, specification_dir=SPECIFICATION_DIR)
 app.add_api('demo-service.yaml', strict_validation=True)
