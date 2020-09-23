@@ -50,4 +50,4 @@ From an experience perspective, the following basic knowledge and experience sho
 
 # Getting started
 
-Please use the Wiki for detailed instructions (**_TODO_**)
+Please use the [Wiki for detailed instructions](https://github.com/nicc777/learning-postman/wiki/1_Getting_Started).
