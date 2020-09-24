@@ -46,7 +46,7 @@ From an experience perspective, the following basic knowledge and experience sho
   * [More examples and explanations of concepts](https://swagger.io/docs/specification/basic-structure/)
 * Python 3 Packages:
   * [Connexion Documentation](https://connexion.readthedocs.io/en/latest/)
-  * [PyJWT Documentation](https://pyjwt.readthedocs.io/en/latest/index.html)
+  * [python-jose Documentation](https://python-jose.readthedocs.io/en/latest/)
 
 # Getting started
 
