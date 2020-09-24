@@ -37,17 +37,21 @@ class CertCache:
 
     def _refresh_cert(self):
         try:
-            print('CertCache: refreshing JWKS')
-            jsonurl = urlopen("https://"+AUTH0_DOMAIN+"/.well-known/jwks.json")
+            print('CertCache._refresh_cert(): refreshing JWKS')
+            jsonurl = urlopen('https://{}/.well-known/jwks.json'.format(AUTH0_DOMAIN))
             self.cert = json.loads(jsonurl.read())
             self.cert_expires = get_utc_timestamp(with_decimal=False) + 3600
+            print('CertCache._refresh_cert(): cert_expires={}'.format(self.cert_expires))
         except:
             print('EXCEPTION: {}'.format(traceback.format_exc()))
 
     def get_cert(self):
         now = get_utc_timestamp(with_decimal=False)
         if now > self.cert_expires:
+            print('CertCache.get_cert(): Refressing JWKS')
             self._refresh_cert()
+        else:
+            print('CertCache.get_cert(): Using Cached JWKS')
         return self.cert
 
 
@@ -55,16 +59,20 @@ cert_cache = CertCache()
 
 
 def decode_token(token):
+    print('decode_token(): token={}'.format(token))
     payload = dict()
+    error = None
     try:
-        # return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        # jsonurl = urlopen("https://"+AUTH0_DOMAIN+"/.well-known/jwks.json")
-        # jwks = json.loads(jsonurl.read())
         jwks = cert_cache.get_cert()
+        #print('decode_token(): jwks={}'.format(jwks))
         unverified_header = jwt.get_unverified_header(token)
+        print('decode_token(): unverified_header["kid"]={}'.format(unverified_header["kid"]))
         rsa_key = {}
         for key in jwks["keys"]:
+            #print('decode_token(): key={}'.format(key))
+            print('decode_token(): key["kid"]={}'.format(key['kid']))
             if key["kid"] == unverified_header["kid"]:
+                print('decode_token(): MATCHING kid')
                 rsa_key = {
                     "kty": key["kty"],
                     "kid": key["kid"],
@@ -72,6 +80,7 @@ def decode_token(token):
                     "n": key["n"],
                     "e": key["e"]
                 }
+                #print('decode_token(): rsa_key={}'.format(rsa_key))
         if rsa_key:
             try:
                 payload = jwt.decode(
@@ -82,24 +91,18 @@ def decode_token(token):
                     issuer="https://"+AUTH0_DOMAIN+"/"
                 )
             except jwt.ExpiredSignatureError:
-                raise AuthError({"code": "token_expired",
-                                "description": "token is expired"}, 401)
+                error = AuthError({"code": "token_expired", "description": "token is expired"}, 401)
             except jwt.JWTClaimsError:
-                raise AuthError({"code": "invalid_claims",
-                                "description":
-                                    "incorrect claims,"
-                                    "please check the audience and issuer"}, 401)
+                error = AuthError({"code": "invalid_claims", "description": "incorrect claims, please check the audience and issuer"}, 401)
             except Exception:
-                raise AuthError({"code": "invalid_header",
-                                "description":
-                                    "Unable to parse authentication"
-                                    " token."}, 401)
-
+                error = AuthError({"code": "invalid_header", "description": "Unable to parse authentication token."}, 401)
             _request_ctx_stack.top.current_user = payload
-        raise AuthError({"code": "invalid_header",
-                        "description": "Unable to find appropriate key"}, 401)
+        else:
+            raise AuthError({"code": "invalid_header", "description": "Unable to find appropriate key"}, 401)
     except:
         print('EXCEPTION: {}'.format(traceback.format_exc()))
+    if error is not None:
+        return error
     return payload
 
 
@@ -109,6 +112,8 @@ def readiness():
 
 def user_profile_get(token_info):
     print('token_info={}'.format(token_info))
+    if 'sub' not in token_info or 'gty' not in token_info:
+        return 'unauthorized', 401
     machine_client_id = token_info['sub']
     authorization_type = token_info['gty']
     return { 'machineClientId': machine_client_id, 'authorizationType': authorization_type }, 200
